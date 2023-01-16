@@ -1,26 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+import { ApolloProvider } from "@apollo/client";
+import { ConfigProvider, Layout } from "antd";
+import { observer } from "mobx-react"; // Or "mobx-react".
+import { useRoutes } from "react-router-dom";
+import { client } from "./config/apolloClient";
+import { routesConfig } from "./config/routes";
+import CustomHeader from "../src/components/header/Header";
+const App = () => {
+  const routes = useRoutes(routesConfig);
+  const { Header, Content } = Layout;
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ApolloProvider client={client}>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#2da44e",
+          },
+        }}
+      >
+        <Layout>
+          <Header
+            style={{
+              backgroundColor: "#fff",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <CustomHeader />
+          </Header>
+          <Content>{routes}</Content>
+        </Layout>
+      </ConfigProvider>
+    </ApolloProvider>
   );
-}
+};
 
-export default App;
+const ObserverApp = observer(App);
+
+export default ObserverApp;
