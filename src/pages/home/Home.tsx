@@ -1,120 +1,88 @@
-import {
-  AppstoreOutlined,
-  BuildOutlined,
-  EnvironmentOutlined,
-  GroupOutlined,
-  StarOutlined,
-  UsergroupAddOutlined,
-} from "@ant-design/icons";
-import { Avatar, Space, Tabs, TabsProps } from "antd";
-import { Col, Row } from "antd/es/grid";
-import Image from "antd/es/image";
+import {AppstoreOutlined, EnvironmentOutlined, GroupOutlined, UsergroupAddOutlined,} from "@ant-design/icons";
+import {Avatar, Card, Space, Spin, Tabs, TabsProps} from "antd";
+import {Col, Row} from "antd/es/grid";
 import Typography from "antd/es/typography";
-import { useEffect, useState } from "react";
+import React from "react";
+import Repository from "../../components/repository";
 import store from "../../store";
-import { OrganizationType } from "../../types/organization";
-import { LanguageType } from "../../types/repository";
+import Organization from "../../components/organization";
+import {observer} from "mobx-react";
+import Entrance from "../AccessToken";
 
 const Home = () => {
-  const [user, setUser] = useState<any>({});
-  useEffect(() => {
-    store.user && setUser(store.user);
-  }, []);
-
-  const items: TabsProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <span>
-          <AppstoreOutlined /> Repository
+    const {user, error, loading} = store
+    const items: TabsProps["items"] = [
+        {
+            key: "1",
+            label: (
+                <span>
+          <AppstoreOutlined/> Repository
         </span>
-      ),
-      children: (
-        <Row>
-          {user.repositories?.nodes?.map((repo: any, idx: number) => (
-            <div key={idx}>
-              <div>{repo.name}</div>
-              <div>
-                {repo?.languages?.nodes?.map((lang: LanguageType) => (
-                  <div style={{ color: `${lang.color}` }}>{lang.name}</div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </Row>
-      ),
-    },
-    {
-      key: "2",
-      label: (
-        <span>
-          <GroupOutlined /> Organization
+            ),
+            children: <Repository/>,
+        },
+        {
+            key: "2",
+            label: (
+                <span>
+          <GroupOutlined/> Organization
         </span>
-      ),
-      children: (
-        <Row>
-          {user.organizations?.nodes?.map(
-            (org: OrganizationType, idx: number) => (
-              <div key={idx} className="cursor-pointer">
-                <div>{org.name}</div>
-                {user.avatarUrl && <Image src={org.avatarUrl} />}
-              </div>
-            )
-          )}
-        </Row>
-      ),
-    },
-    // {
-    //   key: "3",
-    //   label: (
-    //     <span>
-    //       <StarOutlined /> Star
-    //     </span>
-    //   ),
-    //   children: `Content of Tab Pane 3`,
-    // },
-    // {
-    //   key: "4",
-    //   label: (
-    //     <span>
-    //       <BuildOutlined /> Package
-    //     </span>
-    //   ),
-    //   children: `Content of Tab Pane 3`,
-    // },
-  ];
-  return (
-    <>
-      <Row>
-        <Col span={6}>
-          {!!store.user && (
-            <div>
-              <Avatar src={user.avatarUrl} draggable size="large" />
-              <Typography>{user.name}</Typography>
-              <Typography>{user.login}</Typography>
+            ),
+            children: <Organization/>,
+        },
+        {
+            key: "3",
+            label: "Acess Token",
+            children: <Entrance/>,
+        },
+    ];
+    return (
+        <Spin spinning={loading}>
+            <div style={{padding: '1rem'}}>
+                <Row gutter={12}>
+                    <Col span={6}>
+                        <Card title="Profile" bordered={false} style={{width: 400}}>
+                            {Object.keys(store.user).length !== 0 ? (
+                                <div>
+                                    <Avatar src={user.avatarUrl} draggable size='large'/>
+                                    <Typography.Title>{user.name || 'real name'}</Typography.Title>
+                                    <Typography>{user.login || 'username'}</Typography>
 
-              <Typography>{user.bio}</Typography>
-              <Space size={4}>
-                <UsergroupAddOutlined />
-                <Typography>
-                  {user.location} follower{Number(user.location) > 1 && "s"} ·{" "}
-                  {user.location} following
-                </Typography>
-              </Space>
-              <br />
-              <Space size={4}>
-                <EnvironmentOutlined />
-                {user.location}
-              </Space>
+                                    <Typography.Paragraph>{user.bio}</Typography.Paragraph>
+                                    <Space size={4}>
+                                        <UsergroupAddOutlined/>
+                                        <Space>
+                                            {
+                                                user?.followers && (
+                                                    <Typography.Text>{user?.followers?.nodes?.length} follower{(user?.followers?.nodes || [])?.length > 1 && "s"} · {" "}</Typography.Text>
+                                                )
+                                            }
+                                            {
+                                                <Typography.Text>{user?.following?.length || 0} following</Typography.Text>
+                                            }
+
+                                        </Space>
+                                    </Space>
+                                    <br/>
+                                    {
+                                        user.location && <Space size={4}>
+                                            <EnvironmentOutlined/>
+                                            {user.location}
+                                        </Space>
+                                    }
+                                </div>
+                            ) : <div>User not found</div>}
+                        </Card>
+
+                    </Col>
+                    <Col span={18}>
+                        <Tabs defaultActiveKey='1' items={items}/>
+                    </Col>
+                </Row>
             </div>
-          )}
-        </Col>
-        <Col span={18}>
-          <Tabs defaultActiveKey="1" items={items} />
-        </Col>
-      </Row>
-    </>
-  );
+        </Spin>
+
+    );
 };
 
-export default Home;
+export default observer(Home);

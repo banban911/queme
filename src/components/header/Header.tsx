@@ -1,39 +1,54 @@
-import { useLazyQuery } from "@apollo/client";
-import { Button, Input } from "antd";
-import React, { useEffect } from "react";
-import { GET_USER } from "../../graphql/user";
+import {useLazyQuery} from "@apollo/client";
+import {Button, Input} from "antd";
+import React, {useEffect} from "react";
+import {GET_USER} from "../../graphql/user";
 import store from "../../store";
+import {observer} from "mobx-react";
+
 const CustomHeader = () => {
-  const [getUser, { loading, data, networkStatus }] = useLazyQuery(GET_USER);
+    const [getUser, {error, loading, data, refetch }] = useLazyQuery(GET_USER);
 
     useEffect(() => {
-      console.log('data', data)
-      console.log('store', store)
-    store.user = data?.user;
-  }, [data]);
+        if (loading) {
+            store.loading = loading
+        }
+        if (data?.user) {
+            store.user = data?.user;
+        } else {
+            store.user = {};
+        }
+        if (error) {
+            store.error = error
+        }
+        setTimeout(() => {
+            store.loading = false
+        }, 500)
+    }, [loading, data]);
 
-  const { Search } = Input;
-  return (
-    <>
-      <Search
-        placeholder="input search text"
-        onSearch={(value: string) =>
-          getUser({
-            variables: {
-              login: value,
-            },
-          })
-        }
-        allowClear
-        enterButton={
-          <Button type="primary" loading={loading}>
-            Find
-          </Button>
-        }
-        style={{ width: 304 }}
-      />
-    </>
-  );
+    const {Search} = Input;
+    return (
+        <>
+            <Search
+                placeholder="input search text"
+                onSearch={(value: string) =>
+                    getUser({
+                        variables: {
+                            login: value,
+                            limitRepo: store.repoPageSize,
+                            offsetRepo: store.curPage * store.repoPageSize
+                        },
+                    })
+                }
+                allowClear
+                enterButton={
+                    <Button type="primary" loading={loading}>
+                        Find
+                    </Button>
+                }
+                style={{width: 304}}
+            />
+        </>
+    );
 };
 
-export default CustomHeader;
+export default observer(CustomHeader);

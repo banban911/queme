@@ -1,11 +1,14 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
+import store from "../store";
 
 const httpLink = createHttpLink({
   uri: "https://api.github.com/graphql",
+
 });
 
-const token = process.env.REACT_APP_GITHUB_PERSONAL_TOKEN;
+const token = localStorage.getItem('gh-token');
+console.log('token trong context', token)
 const authLink = setContext((_, { headers }) => {
   return {
     headers: {

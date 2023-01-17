@@ -1,7 +1,11 @@
 import { makeAutoObservable } from "mobx";
 import { UserType } from "../types/user";
 class User {
-  user: any = {};
+  user: UserType = {};
+  loading = false;
+  error = {};
+  repoPageSize = 10;
+  curPage = 1
 
   constructor() {
     makeAutoObservable(this);

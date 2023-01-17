@@ -1,21 +1,43 @@
 import { gql } from "@apollo/client";
 
 const GET_USER = gql`
-  query getUser($login: String!) {
+  query getUser($login: String!, $firstRepo: Int!, $afterRepo: Int!) {
     user(login: $login) {
-      repositories(first: 10) {
+      repositories(first: $firstRepo, after: $afterRepo){
+        totalCount
+        pageInfo{
+          endCursor
+          hasNextPage
+          hasPreviousPage
+          startCursor
+        }
         nodes {
+          owner {
+            login
+          }
+          nameWithOwner
           name
           isPrivate
           createdAt
           updatedAt
-          languages(first: 10) {
-            nodes {
+          stargazerCount
+          homepageUrl
+          url
+          repositoryTopics(first: 10){
+            nodes{
+              topic{
+                name
+              }
+              url
+            }
+          }
+          languages(first: 10){
+            nodes{
               color
               name
             }
 
-            edges {
+            edges{
               size
             }
 
@@ -25,10 +47,22 @@ const GET_USER = gql`
         }
       }
 
-      organizations(first: 10) {
-        nodes {
+      organizations(first: 20) {
+        nodes{
           avatarUrl
           name
+        }
+      }
+      followers(first: 10){
+        nodes{
+          id
+          login
+        }
+      }
+      following(first: 10){
+        nodes{
+          id
+          login
         }
       }
       name
